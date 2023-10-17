@@ -3,11 +3,14 @@ import {
   allUsers,
   deleteUser,
   forgotPassword,
+  getUserProfile,
   loginUser,
   logout,
   registerUser,
   resetPassword,
+  updatePassword,
 } from "../controllers/userControllers.js";
+import { isAuthenticatedUser } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.route("/register").post(registerUser);
@@ -18,6 +21,11 @@ router.route("/:id").delete(deleteUser);
 router.route("/").get(allUsers);
 
 router.route("/password/forgot").post(forgotPassword);
-router.route("/api/password/reset/:token").put(resetPassword);
+// router.route("/password/reset/:token").put(resetPassword);
+router.route("/password/reset/:token").put(resetPassword);
+
+router.route("/me").get(isAuthenticatedUser, getUserProfile);
+// router.route("/me/update").put(isAuthenticatedUser, updateProfile);
+router.route("/password/update").put(isAuthenticatedUser, updatePassword);
 
 export default router;

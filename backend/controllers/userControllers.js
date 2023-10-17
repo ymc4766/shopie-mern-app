@@ -100,7 +100,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   // Create reset password url
-  const resetUrl = `${process.env.FRONTEND_URL}/api/password/reset/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
   const message = getResetPasswordTemplate(user?.name, resetUrl);
 
@@ -117,7 +117,6 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   } catch (error) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-
     await user.save();
     return next(new ErrorHandler(error?.message, 500));
   }
@@ -158,4 +157,46 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   generateToken(user, 200, res);
+});
+
+export const getUserProfile = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req?.user?._id);
+
+  res.status(200).json({
+    user,
+  });
+});
+
+export const updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req?.user?._id).select("+password");
+
+  // Check the previous user password
+  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old Password is incorrect", 400));
+  }
+
+  user.password = req.body.password;
+  user.save();
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+export const updateUser = asyncHandler(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+  });
+
+  res.status(200).json({
+    user,
+  });
 });

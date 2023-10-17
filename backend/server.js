@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import db from "./config/db.js";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 // Handle Uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.log(`ERROR: ${err}`);
@@ -16,6 +17,7 @@ process.on("uncaughtException", (err) => {
 import productRoutes from "./routes/productRoutes.js";
 import errorMiddleware from "./middleware/errors.js";
 import userRoutes from "./routes/userRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 // app.use(morgan());
 
@@ -25,9 +27,11 @@ db();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/users", orderRoutes);
 
 app.use(errorMiddleware);
 
